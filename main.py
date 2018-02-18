@@ -135,9 +135,6 @@ def like(user_id, amount):
                                              captcha_sid=captcha[1], captcha_key=captcha[0])
                         else:
                             print(error)
-                    except Exception as exception:
-                        print(exception)
-
                     time.sleep(delay)
                     liked += 1
                 count += 1
@@ -175,7 +172,7 @@ while True:
                 like(u_id, likes_amount)
                 got += 1
                 log_write(got)
-    except KeyboardInterrupt as e:
+    except (KeyboardInterrupt, SystemExit) as e:
         log_write(got)
         quit()
     time.sleep(2)

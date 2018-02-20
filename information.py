@@ -1,6 +1,7 @@
 import time
 import webbrowser as wb
 from urllib.parse import urlparse, parse_qsl
+import os.path
 
 import vk
 from vk.exceptions import VkAPIError
@@ -53,6 +54,8 @@ class WorkInformation:
     'Checkers'
 
     def check_token(self):
+        if not os.path.exists(self.TOKEN_FILE):
+            return False
         num_lines = sum(1 for line in open(self.TOKEN_FILE))
         if num_lines != 3:
             return False
@@ -78,6 +81,8 @@ class WorkInformation:
         return True
 
     def check_variables(self):
+        if not os.path.exists(self.FILENAME):
+            return False
         continuing = True
         num_lines = sum(1 for line in open(self.FILENAME))
         with open(self.FILENAME, 'r') as log:

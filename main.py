@@ -18,7 +18,7 @@ def open_image(captcha_url):
 def captcha_cover(error):
     print(error)
     open_image(error.captcha_img)
-    'wb.open(error.captcha_img)'
+    'webbrowser.open(error.captcha_img)'
     return input('Введите капчу: '), error.captcha_sid
 
 
@@ -42,8 +42,8 @@ def like(user_id, amount):
                             time.sleep(info.delay)
                         else:
                             break
-
             elif error.code == 6:
+                print('Слишком много запросов, подождем 1 секунду...')
                 time.sleep(1)
                 posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
             elif error.code == 18:
@@ -75,7 +75,10 @@ def like(user_id, amount):
                                         time.sleep(info.delay)
                                     else:
                                         break
-
+                        elif error.code == 6:
+                            print('Слишком много запросов, подождем 1 секунду..')
+                            time.sleep(1)
+                            info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                         else:
                             print(error)
                     time.sleep(info.delay)
@@ -106,6 +109,7 @@ def work():
                             else:
                                 break
                 elif error.code == 6:
+                    print('Слишком много запросов, подождем 1 секунду..')
                     time.sleep(1)
                     members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
                                                          count=COUNT, v=info.V)[u'items']

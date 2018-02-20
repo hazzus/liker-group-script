@@ -94,7 +94,7 @@ class WorkInformation:
             if group[0] == '/':
                 group = group[1:]
             print('Домен/id группы - ', group, 'верно?(y/n)')
-            ok = input()
+            ok = input().lower()
             if ok == 'y':
                 break
             else:
@@ -105,21 +105,21 @@ class WorkInformation:
         print('Начинаем новый процесс!')
         self.likes_amount = input('Кол-во лайков("inf" - до конца стены): ')
         self.delay = float(input('Задержка после запросов(милисекунды, влияет на частоту капчи и скорость прохода,'
-                                 ' рекомендую ~900-1500): ')) / 1000
+                                 ' рекомендую ~300-1000): ')) / 1000
         self.group = self.get_group_name()
         self.got = 0
+        self.write_vars()
 
     def get_information_from_file(self):
         print('Запускаю продолжение процесса')
-        log = open(self.FILENAME, 'r')
-        likes_amount = log.readline()
-        self.likes_amount = likes_amount[:len(likes_amount) - 1]
-        delay = log.readline()
-        self.delay = float(delay[:len(delay) - 1])
-        group = log.readline()
-        self.group = group[:len(group) - 1]
-        self.got = int(log.readline())
-        log.close()
+        with open(self.FILENAME, 'r') as log:
+            likes_amount = log.readline()
+            self.likes_amount = likes_amount[:len(likes_amount) - 1]
+            delay = log.readline()
+            self.delay = float(delay[:len(delay) - 1])
+            group = log.readline()
+            self.group = group[:len(group) - 1]
+            self.got = int(log.readline())
 
     'Writers'
 
@@ -129,7 +129,7 @@ class WorkInformation:
             t.write(lt + '\n')
             t.write(gt + '\n')
 
-    def log_write(self):
+    def write_vars(self):
         log = open(self.FILENAME, 'w')
         log.write(self.likes_amount + '\n')
         log.write(str(self.delay) + '\n')

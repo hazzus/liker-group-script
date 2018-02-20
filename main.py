@@ -16,8 +16,9 @@ def open_image(captcha_url):
 
 
 def captcha_cover(error):
-    captcha_image = error.captcha_img
-    open_image(captcha_image)
+    print(error)
+    open_image(error.captcha_img)
+    'wb.open(error.captcha_img)'
     return input('Введите капчу: '), error.captcha_sid
 
 
@@ -30,12 +31,23 @@ def like(user_id, amount):
             posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
         except VkAPIError as error:
             if error.is_captcha_needed():
-                captcha = captcha_cover(error)
-                posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V,
-                                          captcha_sid=captcha[1], captcha_key=captcha[0])[u'items']
+                while True:
+                    try:
+                        captcha = captcha_cover(error)
+                        posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V,
+                                                  captcha_sid=captcha[1], captcha_key=captcha[0])[u'items']
+                        break
+                    except VkAPIError as e:
+                        if e.is_captcha_needed():
+                            time.sleep(info.delay)
+                        else:
+                            break
+
             elif error.code == 6:
                 time.sleep(1)
                 posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
+            elif error.code == 18:
+                print('Пользователь ' + str(user_id) + ' был удален')
             else:
                 print(error)
         time.sleep(info.delay)
@@ -52,9 +64,18 @@ def like(user_id, amount):
                         info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                     except VkAPIError as error:
                         if error.is_captcha_needed():
-                            captcha = captcha_cover(error)
-                            info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V,
-                                               captcha_sid=captcha[1], captcha_key=captcha[0])
+                            while True:
+                                try:
+                                    captcha = captcha_cover(error)
+                                    info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V,
+                                                       captcha_sid=captcha[1], captcha_key=captcha[0])
+                                    break
+                                except VkAPIError as e:
+                                    if e.is_captcha_needed():
+                                        time.sleep(info.delay)
+                                    else:
+                                        break
+
                         else:
                             print(error)
                     time.sleep(info.delay)
@@ -67,22 +88,33 @@ def work():
         try:
             members = None
             try:
-                members = info.api.groups.getMembers(group_id=info.group, offset=info.got, count=COUNT, v=info.V)[u'items']
+                members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
+                                                     count=COUNT, v=info.V)[u'items']
             except VkAPIError as error:
                 if error.is_captcha_needed():
-                    captcha = captcha_cover(error)
-                    members = \
-                        info.api.groups.getMembers(group_id=info.group, offset=info.got, count=COUNT, v=info.V,
-                                                   captcha_sid=captcha[1],
-                                                   captcha_key=captcha[0])[u'items']
+                    while True:
+                        try:
+                            captcha = captcha_cover(error)
+                            members = \
+                                info.api.groups.getMembers(group_id=info.group, offset=info.got, count=COUNT, v=info.V,
+                                                           captcha_sid=captcha[1],
+                                                           captcha_key=captcha[0])[u'items']
+                            break
+                        except VkAPIError as e:
+                            if e.is_captcha_needed():
+                                time.sleep(info.delay)
+                            else:
+                                break
                 elif error.code == 6:
                     time.sleep(1)
                     members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
                                                          count=COUNT, v=info.V)[u'items']
                 elif error.code == 125:
-                    print('Неверный домен группы, попробуйте еще раз')
-                    print(info.group)
+                    print('Неверный домен группы - ' + info.group + ', попробуйте еще раз')
                     info.group = info.get_group_name()
+                    info.write_vars()
+                    members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
+                                                         count=COUNT, v=info.V)[u'items']
                 else:
                     print(error)
             time.sleep(info.delay)
@@ -93,9 +125,9 @@ def work():
                 for u_id in members:
                     like(u_id, info.likes_amount)
                     info.got += 1
-                    info.log_write()
-        except (KeyboardInterrupt, SystemExit) as e:
-            info.log_write()
+                    info.write_vars()
+        except (KeyboardInterrupt, SystemExit):
+            info.write_vars()
             quit()
         time.sleep(2)
 

@@ -1,6 +1,7 @@
 import time
 from urllib.request import urlopen
 from PIL import Image
+from requests.exceptions import ReadTimeout, ConnectionError
 
 from vk.exceptions import VkAPIError
 from information import WorkInformation
@@ -132,10 +133,18 @@ def work():
                     info.write_vars()
         except (KeyboardInterrupt, SystemExit):
             info.write_vars()
+            print('Процесс прерван пользователем, промежуточный результат сохранен')
             quit()
         time.sleep(2)
 
 
 if __name__ == '__main__':
-    info = WorkInformation()
-    work()
+    try:
+        info = WorkInformation()
+        work()
+    except ReadTimeout:
+        print('Интернет-соединение прервано')
+        if info is not None:
+            info.write_vars()
+    except ConnectionError:
+        print('Интернет соединение не установлено')

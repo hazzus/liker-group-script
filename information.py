@@ -2,14 +2,15 @@ import time
 import webbrowser as wb
 from urllib.parse import urlparse, parse_qsl
 import os.path
+from configparser import ConfigParser, MissingSectionHeaderError
 
 import vk
 from vk.exceptions import VkAPIError
 
 
 class WorkInformation:
-    FILENAME = 'variables.log'
-    TOKEN_FILE = 'token.log'
+    FILENAME = 'variables.cfg'
+    TOKEN_FILE = 'token.cfg'
     V = '5.73'
 
     session = None
@@ -56,19 +57,17 @@ class WorkInformation:
     def check_token(self):
         if not os.path.exists(self.TOKEN_FILE):
             return False
-        num_lines = sum(1 for line in open(self.TOKEN_FILE))
-        if num_lines != 3:
+        try:
+            token_config  = ConfigParser()
+            token_config.read(self.TOKEN_FILE)
+            self.token = token_config['TOKEN']['token']
+            live_time = int(token_config['TOKEN']['live_time'])
+            got_time = float(token_config['TOKEN']['got_time'])
+        except (KeyError, MissingSectionHeaderError):
             return False
-        with open(self.TOKEN_FILE, 'r') as t:
-            token = t.readline()
-            self.token = token[:len(token) - 1]
-            live_time = t.readline()
-            live_time = int(live_time[:len(live_time) - 1])
-            got_time = t.readline()
-            got_time = float(got_time[: len(got_time) - 1])
-            if time.time() - got_time > live_time:
-                print('Токен просрочен!')
-                return False
+        if time.time() - got_time > live_time:
+            print('Токен просрочен!')
+            return False
         self.do_session_api()
         try:
             self.api.users.get(user_ids=1, v=self.V)
@@ -83,12 +82,10 @@ class WorkInformation:
     def check_variables(self):
         if not os.path.exists(self.FILENAME):
             return False
-        continuing = True
         num_lines = sum(1 for line in open(self.FILENAME))
-        with open(self.FILENAME, 'r') as log:
-            if (len(log.read()) == 0) or (num_lines != 4):
-                continuing = False
-        return continuing
+        if num_lines != 5:
+            return False
+        return True
 
     'Gathering information'
 
@@ -117,30 +114,29 @@ class WorkInformation:
 
     def get_information_from_file(self):
         print('Запускаю продолжение процесса')
-        with open(self.FILENAME, 'r') as log:
-            likes_amount = log.readline()
-            self.likes_amount = likes_amount[:len(likes_amount) - 1]
-            delay = log.readline()
-            self.delay = float(delay[:len(delay) - 1])
-            group = log.readline()
-            self.group = group[:len(group) - 1]
-            self.got = int(log.readline())
+        config = ConfigParser()
+        config.read(self.FILENAME)
+        self.likes_amount = config['MAIN']['likes_amount']
+        self.delay = float(config['MAIN']['delay'])
+        self.group = config['MAIN']['group']
+        self.got = int(config['MAIN']['got'])
 
     'Writers'
 
     def write_token(self, lt, gt):
         with open(self.TOKEN_FILE, 'w') as t:
-            t.write(self.token + '\n')
-            t.write(lt + '\n')
-            t.write(gt + '\n')
+            t.write('[TOKEN]\n')
+            t.write('token=' + self.token + '\n')
+            t.write('live_time=' + lt + '\n')
+            t.write('got_time=' + gt + '\n')
 
     def write_vars(self):
-        log = open(self.FILENAME, 'w')
-        log.write(self.likes_amount + '\n')
-        log.write(str(self.delay) + '\n')
-        log.write(self.group + '\n')
-        log.write(str(self.got) + '\n')
-        log.close()
+        with open(self.FILENAME, 'w') as var_conf:
+            var_conf.write('[MAIN]\n')
+            var_conf.write('likes_amount=' + self.likes_amount + '\n')
+            var_conf.write('delay=' + str(self.delay) + '\n')
+            var_conf.write('group=' + self.group + '\n')
+            var_conf.write('got=' + str(self.got) + '\n')
 
     def clear_log(self):
         log = open(self.FILENAME, 'w')

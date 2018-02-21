@@ -58,7 +58,7 @@ class WorkInformation:
         if not os.path.exists(self.TOKEN_FILE):
             return False
         try:
-            token_config  = ConfigParser()
+            token_config = ConfigParser()
             token_config.read(self.TOKEN_FILE)
             self.token = token_config['TOKEN']['token']
             live_time = int(token_config['TOKEN']['live_time'])
@@ -89,8 +89,7 @@ class WorkInformation:
 
     'Gathering information'
 
-    @staticmethod
-    def get_group_name():
+    def get_group_name(self):
         while True:
             group = urlparse(input('Ссылка на группу/короткий домен/id: ')).path
             if group[0] == '/':
@@ -98,7 +97,11 @@ class WorkInformation:
             print('Домен/id группы - ', group, 'верно?(y/n)')
             ok = input().lower()
             if ok == 'y':
-                break
+                try:
+                    self.api.groups.getMembers(group_id=group, count=1, v=self.V)
+                    break
+                except VkAPIError:
+                    print('Неверный домен/id. Попробуйте по-другому')
             else:
                 print('Повторите ввод группы по-другому')
         return group

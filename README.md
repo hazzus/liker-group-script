@@ -1,7 +1,7 @@
 # liker-group-script
-Likes people from group
+Likes people from group VK
 
-Ставит лайки людям из групп
+Ставит лайки людям из групп ВКонтакте
 
 ## Instruction
 1. Install all requiremets:

@@ -36,20 +36,20 @@ class WorkInformation:
         self.api = vk.API(self.session)
 
     def auth(self):
-        print('Токена нет, или он неверный, сейчас будет регистрация')
+        print('Not found token, start init process..')
         site = 'https://oauth.vk.com/authorize?client_id=6004708&' \
                'redirect_uri=https://oauth.vk.com/blank.html&scope=wall&response_type=token&v=5.73'
-        print('ВНИМАНИЕ. Через 6 секунд откроется сайт аутентификации, не закрывайте вкладку после разрешения доступа')
+        print('After 6 seconds, the authentication site will open, do not close the tab after allowing access')
         time.sleep(6)
         wb.open(site)
         try:
-            parse_dict = dict(parse_qsl(urlparse(input('Введите ссылку/поле адреса открывшегося сайта: ')).fragment))
+            parse_dict = dict(parse_qsl(urlparse(input('Paste link to open page: ')).fragment))
             self.token = parse_dict[u'access_token']
             live_time = parse_dict[u'expires_in']
             got_time = str(time.time())
             self.write_token(live_time, got_time)
         except KeyError:
-            print('Неверный токен(не найден). Запустите заново и разрешите доступ аутентификации')
+            print('No found valid token. Allow access for application and retry')
             quit()
 
     'Checkers'
@@ -66,14 +66,14 @@ class WorkInformation:
         except (KeyError, MissingSectionHeaderError):
             return False
         if time.time() - got_time > live_time:
-            print('Токен просрочен!')
+            print('Token expired!')
             return False
         self.do_session_api()
         try:
             self.api.users.get(user_ids=1, v=self.V)
         except VkAPIError as e:
             if e.code == 5:
-                print('Токен неверный!')
+                print('Toker not-correct')
             else:
                 print(e)
             return False
@@ -91,32 +91,31 @@ class WorkInformation:
 
     def get_group_name(self):
         while True:
-            group = urlparse(input('Ссылка на группу/короткий домен/id: ')).path
+            group = urlparse(input('Group link or group id: ')).path
             if group[0] == '/':
                 group = group[1:]
-            print('Домен/id группы - ', group, 'верно?(y/n)')
+            print('Group ID ', group, ', is correct ?(y/n)')
             ok = input().lower()
             if ok == 'y':
                 try:
                     self.api.groups.getMembers(group_id=group, count=1, v=self.V)
                     break
                 except VkAPIError:
-                    print('Неверный домен/id. Попробуйте по-другому')
+                    print('Non-corret group link or ID')
             else:
-                print('Повторите ввод группы по-другому')
+                print('Repeat enter group id')
         return group
 
     def get_information_from_user(self):
-        print('Начинаем новый процесс!')
-        self.likes_amount = input('Кол-во лайков("inf" - до конца стены): ')
-        self.delay = float(input('Задержка после запросов(милисекунды, влияет на частоту капчи и скорость прохода,'
-                                 ' рекомендую ~300-1000): ')) / 1000
+        print('Start new job. Configure:')
+        self.likes_amount = input('Max likes on user page("inf" for infinity): ')
+        self.delay = float(input('Delay between requests (milliseconds, small values lead to a captcha and temporary blocking), it is recommended not less than 10,000 (10 seconds).')) / 1000
         self.group = self.get_group_name()
         self.got = 0
         self.write_vars()
 
     def get_information_from_file(self):
-        print('Запускаю продолжение процесса')
+        print('Continue the previous job')
         config = ConfigParser()
         config.read(self.FILENAME)
         self.likes_amount = config['MAIN']['likes_amount']

@@ -6,4 +6,4 @@ if __name__ == '__main__':
         info = WorkInformation('configurator')
         print('Configures currently saved. You can now run main.py')
     except KeyboardInterrupt:
-        print('Процесс конфигурации прерван пользователем')
+        print('Process of configure interrupted by user')

@@ -45,7 +45,7 @@ class WorkInformation:
         self.api = vk.API(self.session)
 
     def auth(self):
-        print('Token not found/broken, starting auth process..')
+        print('Token not found or broken, starting auth process..')
         site = 'https://oauth.vk.com/authorize?client_id=6004708&' \
                'redirect_uri=https://oauth.vk.com/blank.html&scope=wall&response_type=token&v=5.73'
         print('After 6 seconds, the authentication site will open, do not close the tab after allowing access')
@@ -118,8 +118,8 @@ class WorkInformation:
     def get_information_from_user(self):
         print('Start new job. Configure:')
         self.likes_amount = input('Max likes on user page("inf" for infinity): ')
-        self.delay = float(input('Delay between requests (milliseconds, small values lead to a captcha and temporary '
-                                 'blocking), it is recommended not less than 10,000 (10 seconds).')) / 1000
+        self.delay = float(input('Delay in seconds between requests (small values lead to a captcha and temporary '
+                                 'blocking), it is recommended not less than 10 seconds: '))
         self.group = self.get_group_name()
         self.got = 0
         self.write_vars()

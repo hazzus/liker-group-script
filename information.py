@@ -32,7 +32,7 @@ class WorkInformation:
             else:
                 self.get_information_from_file()
         elif process_type == 'configurator':
-            if not self.check_token():
+            while not self.check_token():
                 self.auth()
             if not self.check_variables():
                 self.get_information_from_user()
@@ -58,7 +58,7 @@ class WorkInformation:
             got_time = str(time.time())
             self.write_token(live_time, got_time)
         except KeyError:
-            print('No found valid token. Allow access for application and retry')
+            print('Valid token not found. Allow access for application and retry')
             quit()
 
     'Checkers'
@@ -82,7 +82,7 @@ class WorkInformation:
             self.api.users.get(user_ids=1, v=self.V)
         except VkAPIError as e:
             if e.code == 5:
-                print('Toker not-correct')
+                print('Token is incorrect')
             else:
                 print(e)
             return False
@@ -110,7 +110,7 @@ class WorkInformation:
                     self.api.groups.getMembers(group_id=group, count=1, v=self.V)
                     break
                 except VkAPIError:
-                    print('Non-corret group link or ID')
+                    print('Non-correct group link or ID')
             else:
                 print('Repeat enter group id')
         return group
@@ -125,13 +125,13 @@ class WorkInformation:
         self.write_vars()
 
     def get_information_from_file(self):
-        print('Continue the previous job')
         config = ConfigParser()
         config.read(self.FILENAME)
         self.likes_amount = config['MAIN']['likes_amount']
         self.delay = float(config['MAIN']['delay'])
         self.group = config['MAIN']['group']
         self.got = int(config['MAIN']['got'])
+        print('Continue the previous job. ' + str(self.got) + ' users are already liked')
 
     'Writers'
 

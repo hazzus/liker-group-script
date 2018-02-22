@@ -17,6 +17,7 @@ def open_image(captcha_url):
 
 
 def captcha_cover(error):
+    # TODO normal single method for captcha cover with constructor from error answer and eval()
     print(error)
     open_image(error.captcha_img)
     'webbrowser.open(error.captcha_img)'
@@ -96,7 +97,7 @@ def work():
         members = None
         try:
             members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
-                                                 count=COUNT, v=info.V)[u'items']
+                                                 count=COUNT, v=info.V)
         except VkAPIError as error:
             if error.is_captcha_needed():
                 while True:
@@ -105,7 +106,7 @@ def work():
                         members = \
                             info.api.groups.getMembers(group_id=info.group, offset=info.got, count=COUNT, v=info.V,
                                                        captcha_sid=captcha[1],
-                                                       captcha_key=captcha[0])[u'items']
+                                                       captcha_key=captcha[0])
                         break
                     except VkAPIError as e:
                         if e.is_captcha_needed():
@@ -118,24 +119,27 @@ def work():
                 print('Too many requests, wait 1 second')
                 time.sleep(1)
                 members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
-                                                     count=COUNT, v=info.V)[u'items']
+                                                     count=COUNT, v=info.V)
             elif error.code == 125:
                 print('Non-valid group name: ' + info.group)
                 info.group = info.get_group_name()
                 info.write_vars()
                 members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
-                                                     count=COUNT, v=info.V)[u'items']
+                                                     count=COUNT, v=info.V)
             else:
                 print(error)
         time.sleep(info.delay)
-        if not members:
+        if not members[u'items']:
             print('All users liked')
             break
         else:
-            for u_id in members:
+            all_users = members[u'count']
+            for u_id in members[u'items']:
                 like(u_id, info.likes_amount)
                 info.got += 1
                 info.write_vars()
+                print('User http://vk.com/id' + str(u_id) + ' posts were liked. Totally ' + str(info.got) +
+                      ' users liked (' + str(round(info.got / all_users * 100, 2)) + '%)')
         time.sleep(2)
 
 

@@ -21,13 +21,22 @@ class WorkInformation:
     group = None
     got = None
 
-    def __init__(self):
-        while not self.check_token():
-            self.auth()
-        if not self.check_variables():
-            self.get_information_from_user()
-        else:
-            self.get_information_from_file()
+    def __init__(self, process_type):
+        if process_type == 'worker':
+            if not self.check_token():
+                print('Token not configured or broken, auth needed. Try running configure.py')
+                quit()
+            if not self.check_variables():
+                print('Variables not configured or broken. Try running configure.py')
+                quit()
+            else:
+                self.get_information_from_file()
+        elif process_type == 'configurator':
+            if not self.check_token():
+                self.auth()
+            if not self.check_variables():
+                self.get_information_from_user()
+
 
     'Authentication'
 
@@ -36,7 +45,7 @@ class WorkInformation:
         self.api = vk.API(self.session)
 
     def auth(self):
-        print('Not found token, start init process..')
+        print('Token not found/broken, starting auth process..')
         site = 'https://oauth.vk.com/authorize?client_id=6004708&' \
                'redirect_uri=https://oauth.vk.com/blank.html&scope=wall&response_type=token&v=5.73'
         print('After 6 seconds, the authentication site will open, do not close the tab after allowing access')
@@ -109,7 +118,8 @@ class WorkInformation:
     def get_information_from_user(self):
         print('Start new job. Configure:')
         self.likes_amount = input('Max likes on user page("inf" for infinity): ')
-        self.delay = float(input('Delay between requests (milliseconds, small values lead to a captcha and temporary blocking), it is recommended not less than 10,000 (10 seconds).')) / 1000
+        self.delay = float(input('Delay between requests (milliseconds, small values lead to a captcha and temporary '
+                                 'blocking), it is recommended not less than 10,000 (10 seconds).')) / 1000
         self.group = self.get_group_name()
         self.got = 0
         self.write_vars()

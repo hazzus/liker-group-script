@@ -140,8 +140,8 @@ def work():
 
 
 if __name__ == '__main__':
+    info = WorkInformation('worker')
     try:
-        info = WorkInformation()
         work()
     except ReadTimeout:
         print('Timeout (connection broken)')

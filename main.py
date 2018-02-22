@@ -20,7 +20,7 @@ def captcha_cover(error):
     print(error)
     open_image(error.captcha_img)
     'webbrowser.open(error.captcha_img)'
-    return input('Введите капчу: '), error.captcha_sid
+    return input('Enter captcha text: '), error.captcha_sid
 
 
 def like(user_id, amount):
@@ -43,14 +43,14 @@ def like(user_id, amount):
                             time.sleep(info.delay)
                         else:
                             print(e)
-                            print('Непредвиденная ошибка')
+                            print('Unhandled error')
                             quit()
             elif error.code == 6:
-                print('Слишком много запросов, подождем 1 секунду...')
+                print('Too many requests, wait 1 seconds')
                 time.sleep(1)
                 posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
             elif error.code == 18:
-                print('Пользователь ' + str(user_id) + ' был удален')
+                print('User https://vk.com/id' + str(user_id) + ' has been deleted or bloking')
             else:
                 print(error)
         time.sleep(info.delay)
@@ -62,7 +62,7 @@ def like(user_id, amount):
                 if str(liked) == amount:
                     break
                 if count % 3 == 0:
-                    print('Лайкаю пост ' + str(p[u'id']) + ' пользователя https://vk.com/id' + str(user_id))
+                    print('Post ' + str(p[u'id']) + ' user https://vk.com/id' + str(user_id) + ' has been liked')
                     try:
                         info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                     except VkAPIError as error:
@@ -78,10 +78,10 @@ def like(user_id, amount):
                                         time.sleep(info.delay)
                                     else:
                                         print(e)
-                                        print('Непредвиденная ошибка')
+                                        print('Unhandled error')
                                         quit()
                         elif error.code == 6:
-                            print('Слишком много запросов, подождем 1 секунду..')
+                            print('Too many requests, wait 1 second')
                             time.sleep(1)
                             info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                         else:
@@ -112,15 +112,15 @@ def work():
                             time.sleep(info.delay)
                         else:
                             print(e)
-                            print('Непредвиденная ошибка')
+                            print('Unhandled error')
                             quit()
             elif error.code == 6:
-                print('Слишком много запросов, подождем 1 секунду..')
+                print('Too many requests, wait 1 second')
                 time.sleep(1)
                 members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
                                                      count=COUNT, v=info.V)[u'items']
             elif error.code == 125:
-                print('Неверный домен группы - ' + info.group + ', попробуйте еще раз')
+                print('Non-valid group name: ' + info.group)
                 info.group = info.get_group_name()
                 info.write_vars()
                 members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
@@ -129,7 +129,7 @@ def work():
                 print(error)
         time.sleep(info.delay)
         if not members:
-            print('Дело сделано')
+            print('All users liked')
             break
         else:
             for u_id in members:
@@ -144,12 +144,12 @@ if __name__ == '__main__':
         info = WorkInformation()
         work()
     except ReadTimeout:
-        print('Интернет-соединение прервано')
+        print('Timeout (connection broken)')
         if info is not None:
             info.write_vars()
     except ConnectionError:
-        print('Интернет соединение не установлено')
+        print('Connection not established')
     except (KeyboardInterrupt, SystemExit):
         if info is not None:
             info.write_vars()
-        print('Процесс прерван пользователем, промежуточный результат сохранен')
+        print('Process interrupted, current state saved')

@@ -9,7 +9,7 @@ Likes people from groups VK
 `pip3 install -r requirements.txt`
 
 2. **You should firstly run** `configure.py` in order to create **.cfg** files:  
-`python3 configure.py`
+`python3 main.py init`
 
 3. Now you can run script, enjoy new followers and friends:  
 `python3 main.py`
@@ -18,10 +18,10 @@ Likes people from groups VK
 1. Установите зависимости:  
 `pip3 install -r requirements.txt`
 
-2. **Сперва запустите конфигуратор** `configure.py` чтобы создать **.cfg** файлы:  
-`python3 configure.py`
+2. **Сперва запустите скрипт с параметром конфигуратора** чтобы создать **.cfg** файлы:  
+`python3 main.py init`
 
-3. Запустите скрипт:  
+3. Запустите скрипт без аргументов, наслаждайтесь новыми подписчиками и друзьями:  
 `python3 main.py`
 
 ## Information

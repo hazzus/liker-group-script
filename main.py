@@ -2,6 +2,7 @@ import time
 from urllib.request import urlopen
 from PIL import Image
 from requests.exceptions import ReadTimeout, ConnectionError
+import sys
 
 from vk.exceptions import VkAPIError
 from information import WorkInformation
@@ -143,17 +144,30 @@ def work():
         time.sleep(2)
 
 
-if __name__ == '__main__':
-    info = WorkInformation('worker')
+def configure():
     try:
-        work()
-    except ReadTimeout:
-        print('Timeout (connection broken)')
-        if info is not None:
-            info.write_vars()
-    except ConnectionError:
-        print('Connection not established')
-    except (KeyboardInterrupt, SystemExit):
-        if info is not None:
-            info.write_vars()
-        print('Process interrupted, current state saved')
+        WorkInformation('configurator')
+        print('Configures currently saved. You can now run without argument')
+    except KeyboardInterrupt:
+        print('Process of configure interrupted by user')
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2 and sys.argv[1] == 'init':
+        configure()
+    elif len(sys.argv) == 1:
+        info = WorkInformation('worker')
+        try:
+            work()
+        except ReadTimeout:
+            print('Timeout (connection broken)')
+            if info is not None:
+                info.write_vars()
+        except ConnectionError:
+            print('Connection not established')
+        except (KeyboardInterrupt, SystemExit):
+            if info is not None:
+                info.write_vars()
+            print('Process interrupted, current state saved')
+    else:
+        print('Invalid argument usage')

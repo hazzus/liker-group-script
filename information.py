@@ -24,18 +24,23 @@ class WorkInformation:
     def __init__(self, process_type):
         if process_type == 'worker':
             if not self.check_token():
-                print('Token not configured or broken, auth needed. Try running configure.py')
+                print('Token not configured or broken, auth needed. Try running with \'init\' argument')
                 quit()
             if not self.check_variables():
-                print('Variables not configured or broken. Try running configure.py')
+                print('Variables not configured or broken. Try running with \'init\' argument')
                 quit()
             else:
                 self.get_information_from_file()
         elif process_type == 'configurator':
             while not self.check_token():
                 self.auth()
+            print('Token is okay')
             if not self.check_variables():
                 self.get_information_from_user()
+            else:
+                if input('Variables are ok. Do you want to reconfigure them?(y/n): ') == 'y':
+                    self.clear_vars()
+                    self.get_information_from_user()
 
 
     'Authentication'
@@ -45,7 +50,7 @@ class WorkInformation:
         self.api = vk.API(self.session)
 
     def auth(self):
-        print('Token not found/broken, starting auth process..')
+        print('Starting auth process..')
         site = 'https://oauth.vk.com/authorize?client_id=6004708&' \
                'redirect_uri=https://oauth.vk.com/blank.html&scope=wall&response_type=token&v=5.73'
         print('After 6 seconds, the authentication site will open, do not close the tab after allowing access')
@@ -150,7 +155,7 @@ class WorkInformation:
             var_conf.write('group=' + self.group + '\n')
             var_conf.write('got=' + str(self.got) + '\n')
 
-    def clear_log(self):
-        log = open(self.FILENAME, 'w')
-        log.write('')
-        log.close()
+    def clear_vars(self):
+        vars_file = open(self.FILENAME, 'w')
+        vars_file.write('')
+        vars_file.close()

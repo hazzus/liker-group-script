@@ -52,7 +52,7 @@ def like(user_id, amount):
                 time.sleep(1)
                 posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
             elif error.code == 18:
-                print('User https://vk.com/id' + str(user_id) + ' has been deleted or bloking')
+                print('User https://vk.com/id' + str(user_id) + ' has been deleted or blocked')
             else:
                 print(error)
         time.sleep(info.delay)

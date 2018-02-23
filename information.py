@@ -25,7 +25,7 @@ class WorkInformation:
     def __init__(self, process_type):
         if process_type == 'worker':
             if not self.check_token():
-                print('Token not configured or broken, auth needed. Try running with \'init\' argument')
+                print('Token not configured or broken, auth needed. Try running with \'update_token\' argument')
                 quit()
             if not self.check_variables():
                 print('Variables not configured or broken. Try running with \'init\' argument')

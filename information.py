@@ -39,7 +39,7 @@ class WorkInformation:
             if not self.check_variables():
                 self.get_information_from_user()
             else:
-                if input('Variables are ok. Do you want to reconfigure them? (y/n): ').lower() == 'y':
+                if input('Variables are ok. Do you want to reconfigure them? (Y/n): ').lower() != 'n':
                     self.clear_vars()
                     self.get_information_from_user()
 
@@ -109,7 +109,7 @@ class WorkInformation:
             group = urlparse(input('Group link or group id: ')).path
             if group[0] == '/':
                 group = group[1:]
-            if input('Group ID "' + group + '", is correct? (y/n) ').lower() == 'y':
+            if input('Group ID "' + group + '", is correct? (Y/n) ').lower() != 'n':
                 try:
                     self.api.groups.getMembers(group_id=group, count=1, v=self.V)
                     break

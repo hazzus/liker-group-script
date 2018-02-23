@@ -149,7 +149,7 @@ def configure():
         WorkInformation('configurator')
         print('Configures currently saved. You can now run without argument')
     except KeyboardInterrupt:
-        print('Process of configure interrupted by user')
+        print('\nProcess of configure interrupted by user')
 
 
 if __name__ == '__main__':
@@ -168,6 +168,6 @@ if __name__ == '__main__':
         except (KeyboardInterrupt, SystemExit):
             if info is not None:
                 info.write_vars()
-            print('Process interrupted, current state saved')
+            print('\nProcess interrupted, current state saved')
     else:
         print('Invalid argument usage')

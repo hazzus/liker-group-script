@@ -56,12 +56,12 @@ def like(user_id, amount):
             else:
                 print(error)
         time.sleep(info.delay)
-        if (not posts) or (str(liked) == amount):
+        if (not posts) or (liked == amount):
             break
         else:
             count = 0
             for p in posts:
-                if str(liked) == amount:
+                if liked == amount:
                     break
                 if count % info.post_offset == 0:
                     print('Post ' + str(p[u'id']) + ' user https://vk.com/id' + str(user_id) + ' has been liked.')

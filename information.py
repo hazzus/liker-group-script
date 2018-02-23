@@ -37,6 +37,8 @@ class WorkInformation:
                 else:
                     print('Continue the previous job. ' + str(self.got) + ' users are already liked')
         elif process_type == 'update vars':
+            if not self.check_token():
+                print('Invalid token. Firstly try running with \'update_token\' parameter')
             if not self.check_variables():
                 self.get_information_from_user()
             else:

@@ -20,6 +20,7 @@ class WorkInformation:
     delay = None
     group = None
     got = None
+    post_offset = None
 
     def __init__(self, process_type):
         if process_type == 'worker':
@@ -97,7 +98,7 @@ class WorkInformation:
         if not os.path.exists(self.FILENAME):
             return False
         num_lines = sum(1 for line in open(self.FILENAME))
-        if num_lines != 5:
+        if num_lines != 6:
             return False
         return True
 
@@ -125,6 +126,7 @@ class WorkInformation:
         self.likes_amount = input('Max likes on user page("inf" for infinity): ')
         self.delay = float(input('Delay between requests (seconds, small values lead to a captcha and temporary '
                                  'blocking), it is recommended not less than 10 seconds: '))
+        self.post_offset = float(input('The offset between the posts: '))
         self.group = self.get_group_name()
         self.got = 0
         self.write_vars()
@@ -136,6 +138,7 @@ class WorkInformation:
         self.delay = float(config['MAIN']['delay'])
         self.group = config['MAIN']['group']
         self.got = int(config['MAIN']['got'])
+        self.post_offset = int(config['MAIN']['post_offset'])
         print('Continue the previous job. ' + str(self.got) + ' users are already liked')
 
     'Writers'
@@ -154,6 +157,7 @@ class WorkInformation:
             var_conf.write('delay=' + str(self.delay) + '\n')
             var_conf.write('group=' + self.group + '\n')
             var_conf.write('got=' + str(self.got) + '\n')
+            var_conf.write('post_offset=' + str(self.post_offset) + '\n')
 
     def clear_vars(self):
         vars_file = open(self.FILENAME, 'w')

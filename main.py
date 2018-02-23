@@ -63,8 +63,8 @@ def like(user_id, amount):
             for p in posts:
                 if str(liked) == amount:
                     break
-                if count % 3 == 0:
                     print('Post ' + str(p[u'id']) + ' user https://vk.com/id' + str(user_id) + ' has been liked')
+                if count % info.post_offset == 0:
                     try:
                         info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                     except VkAPIError as error:

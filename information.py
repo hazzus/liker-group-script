@@ -78,7 +78,7 @@ class WorkInformation:
     def check_token(self):
         if not os.path.exists(self.TOKEN_FILE):
             return False
-        with open(self.TOKEN_FILE 'r' encoding='utf-8') as token_file:
+        with open(self.TOKEN_FILE, 'r', encoding='utf-8') as token_file:
             try:
                   token_data = json.loads(token_file.read())
                   self.token = token_data['token']
@@ -103,7 +103,7 @@ class WorkInformation:
     def check_variables(self):
         if not os.path.exists(self.CONFIG_FILE):
             return False
-        with open(self.CONFIG_FILE, 'r' encoding='utf-8') as data_file:
+        with open(self.CONFIG_FILE, 'r', encoding='utf-8') as data_file:
            try:
                data = json.loads(data_file.read())
            except ValueError:
@@ -138,7 +138,7 @@ class WorkInformation:
         self.write_vars()
 
     def get_information_from_file(self):
-        with open(self.CONFIG_FILE, 'r' encoding='utf-8') as data_file:
+        with open(self.CONFIG_FILE, 'r', encoding='utf-8') as data_file:
             data = json.loads(data_file.read())
             self.likes_amount = data['likes_amount']
             self.delay = data['delay']

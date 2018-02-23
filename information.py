@@ -2,7 +2,6 @@ import time
 import webbrowser as wb
 from urllib.parse import urlparse, parse_qsl
 import os.path
-from configparser import ConfigParser, MissingSectionHeaderError
 
 import json
 import vk
@@ -37,18 +36,20 @@ class WorkInformation:
                     print('Start new job.')
                 else:
                     print('Continue the previous job. ' + str(self.got) + ' users are already liked')
-
-        elif process_type == 'configurator':
-            while not self.check_token():
-                self.auth()
-            print('Token is okay')
+        elif process_type == 'update vars':
             if not self.check_variables():
                 self.get_information_from_user()
             else:
-                if input('Variables are ok. Do you want to reconfigure them? (Y/n): ').lower() != 'n':
+                if input('Variables are ok. Sure you want to reconfigure them? (Y/n): ').lower() != 'n':
                     self.clear_vars()
                     self.get_information_from_user()
-
+        elif process_type == 'update token':
+            while True:
+                self.auth()
+                if not self.check_token():
+                    print('Invalid token')
+                else:
+                    break
 
     'Authentication'
 
@@ -80,12 +81,12 @@ class WorkInformation:
             return False
         with open(self.TOKEN_FILE, 'r', encoding='utf-8') as token_file:
             try:
-                  token_data = json.loads(token_file.read())
-                  self.token = token_data['token']
-                  live_time = token_data['live_time']
-                  got_time = token_data['got_time']
+                token_data = json.loads(token_file.read())
+                self.token = token_data['token']
+                live_time = token_data['live_time']
+                got_time = token_data['got_time']
             except ValueError:
-                  return False
+                return False
         if time.time() - got_time > live_time:
             print('Token expired!')
             return False
@@ -104,10 +105,10 @@ class WorkInformation:
         if not os.path.exists(self.CONFIG_FILE):
             return False
         with open(self.CONFIG_FILE, 'r', encoding='utf-8') as data_file:
-           try:
-               data = json.loads(data_file.read())
-           except ValueError:
-               return False
+            try:
+                data = json.loads(data_file.read())
+            except ValueError:
+                return False
         return True
 
     'Gathering information'
@@ -129,9 +130,9 @@ class WorkInformation:
 
     def get_information_from_user(self):
         print('\nConfigure variables:')
-        self.likes_amount = int(input('Max likes on user page("inf" for infinity): '))
+        self.likes_amount = int(input('Max likes on user page("-1" for infinity): '))
         self.delay = int(input('Delay between requests (seconds, small values lead to a captcha and temporary '
-                                 'blocking), it is recommended not less than 10 seconds: '))
+                               'blocking), it is recommended not less than 10 seconds: '))
         self.post_offset = int(input('The offset between the posts: '))
         self.group = self.get_group_name()
         self.got = 0
@@ -151,20 +152,20 @@ class WorkInformation:
     def write_token(self, live_time, got_time):
         with open(self.TOKEN_FILE, 'w') as token_file:
             d = {
-               "token": self.token,
-               "live_time": live_time,
-               "got_time": got_time,
+                "token": self.token,
+                "live_time": live_time,
+                "got_time": got_time,
             }
             token_file.write(json.dumps(d))
 
     def write_vars(self):
         with open(self.CONFIG_FILE, 'w') as vars_file:
             d = {
-               "likes_amount": self.likes_amount,
-               "delay": self.delay,
-               "group": self.group,
-               "got": self.got,
-               "post_offset": self.post_offset,
+                "likes_amount": self.likes_amount,
+                "delay": self.delay,
+                "group": self.group,
+                "got": self.got,
+                "post_offset": self.post_offset,
             }
             vars_file.write(json.dumps(d))
 

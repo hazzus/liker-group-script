@@ -122,9 +122,9 @@ class WorkInformation:
     def get_information_from_user(self):
         print('Start new job. Configure:')
         self.likes_amount = input('Max likes on user page("inf" for infinity): ')
-        self.delay = float(input('Delay between requests (seconds, small values lead to a captcha and temporary '
+        self.delay = int(input('Delay between requests (seconds, small values lead to a captcha and temporary '
                                  'blocking), it is recommended not less than 10 seconds: '))
-        self.post_offset = float(input('The offset between the posts: '))
+        self.post_offset = int(input('The offset between the posts: '))
         self.group = self.get_group_name()
         self.got = 0
         self.write_vars()
@@ -133,7 +133,7 @@ class WorkInformation:
         config = ConfigParser()
         config.read(self.FILENAME)
         self.likes_amount = config['MAIN']['likes_amount']
-        self.delay = float(config['MAIN']['delay'])
+        self.delay = int(config['MAIN']['delay'])
         self.group = config['MAIN']['group']
         self.got = int(config['MAIN']['got'])
         self.post_offset = int(config['MAIN']['post_offset'])

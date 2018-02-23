@@ -8,7 +8,10 @@ Likes people from groups VK
 1. Install all requirements:  
 `pip3 install -r requirements.txt`
 
-2. **You should firstly run** `configure.py` in order to create **.cfg** files:  
+2. **Firstly run script with parameter of authorization**:  
+`python3 main.py update_token`
+
+2. **Then run it in configure mode** in order to create **.cfg** files:  
 `python3 main.py init`
 
 3. Now you can run script, enjoy new followers and friends:  
@@ -18,10 +21,13 @@ Likes people from groups VK
 1. Установите зависимости:  
 `pip3 install -r requirements.txt`
 
-2. **Сперва запустите скрипт с параметром конфигуратора** чтобы создать **.cfg** файлы:  
+2. **Сперва запустите скрипт с параметром регистрации** чтобы авторизоваться:  
+`python3 main.py update_token`
+
+3. **Потом запустите скрипт с параметром конфигуратора** чтобы создать **.cfg** файлы:  
 `python3 main.py init`
 
-3. Запустите скрипт без аргументов, наслаждайтесь новыми подписчиками и друзьями:  
+4. Запустите скрипт без аргументов, наслаждайтесь новыми подписчиками и друзьями:  
 `python3 main.py`
 
 ## Information

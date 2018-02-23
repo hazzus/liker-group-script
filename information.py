@@ -24,24 +24,27 @@ class WorkInformation:
     def __init__(self, process_type):
         if process_type == 'worker':
             if not self.check_token():
-                print('Token not configured or broken, auth needed. Try running with \'init\' argument')
+                print('Token not configured or broken, auth needed. Try running with \'update_token\' argument')
                 quit()
             if not self.check_variables():
                 print('Variables not configured or broken. Try running with \'init\' argument')
                 quit()
             else:
                 self.get_information_from_file()
-        elif process_type == 'configurator':
-            while not self.check_token():
-                self.auth()
-            print('Token is okay')
+        elif process_type == 'update vars':
             if not self.check_variables():
                 self.get_information_from_user()
             else:
                 if input('Variables are ok. Do you want to reconfigure them?(y/n): ') == 'y':
                     self.clear_vars()
                     self.get_information_from_user()
-
+        elif process_type == 'update token':
+            while True:
+                self.auth()
+                if not self.check_token():
+                    print('Invalid token. Restarting')
+                else:
+                    break
 
     'Authentication'
 

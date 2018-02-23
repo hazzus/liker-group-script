@@ -144,17 +144,27 @@ def work():
         time.sleep(2)
 
 
-def configure():
+def update_variables():
     try:
-        WorkInformation('configurator')
+        WorkInformation('update vars')
         print('Configures currently saved. You can now run without argument')
     except KeyboardInterrupt:
         print('Process of configure interrupted by user')
 
 
+def update_token():
+    try:
+        WorkInformation('update token')
+        print('Re-auth finished successfully')
+    except KeyboardInterrupt:
+        print('Auth interrupted by user')
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == 'init':
-        configure()
+        update_variables()
+    elif len(sys.argv) == 2 and sys.argv[1] == 'update_token':
+        update_token()
     elif len(sys.argv) == 1:
         info = WorkInformation('worker')
         try:

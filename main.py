@@ -56,15 +56,15 @@ def like(user_id, amount):
             else:
                 print(error)
         time.sleep(info.delay)
-        if (not posts) or (str(liked) == amount):
+        if (not posts) or (liked == amount):
             break
         else:
             count = 0
             for p in posts:
-                if str(liked) == amount:
+                if liked == amount:
                     break
-                if count % 3 == 0:
-                    print('Post ' + str(p[u'id']) + ' user https://vk.com/id' + str(user_id) + ' has been liked')
+                if count % info.post_offset == 0:
+                    print('Post ' + str(p[u'id']) + ' user https://vk.com/id' + str(user_id) + ' has been liked.')
                     try:
                         info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                     except VkAPIError as error:
@@ -149,7 +149,7 @@ def update_variables():
         WorkInformation('update vars')
         print('Configures currently saved. You can now run without argument')
     except KeyboardInterrupt:
-        print('Process of configure interrupted by user')
+        print('\nProcess of configure interrupted by user')
 
 
 def update_token():
@@ -178,6 +178,6 @@ if __name__ == '__main__':
         except (KeyboardInterrupt, SystemExit):
             if info is not None:
                 info.write_vars()
-            print('Process interrupted, current state saved')
+            print('\nProcess interrupted, current state saved')
     else:
         print('Invalid argument usage')

@@ -25,9 +25,14 @@ def captcha_cover(error):
     return input('Enter captcha text: '), error.captcha_sid
 
 
-def like(user_id, amount):
+def like(user_id, user_info, amount):
     off = 0
     liked = 0
+    link = ''
+    if 'screen_name' in user_info.keys():
+        link = user_info[u'screen_name']
+    else:
+        link = 'id' + str(user_id)
     while True:
         posts = None
         try:
@@ -52,7 +57,7 @@ def like(user_id, amount):
                 time.sleep(1)
                 posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
             elif error.code == 18:
-                print('User https://vk.com/id' + str(user_id) + ' has been deleted or blocked')
+                print('User https://vk.com/' + link + ' has been deleted or blocked')
             else:
                 print(error)
         time.sleep(info.delay)
@@ -64,7 +69,8 @@ def like(user_id, amount):
                 if liked == amount:
                     break
                 if count % info.post_offset == 0:
-                    print('Post ' + str(p[u'id']) + ' user https://vk.com/id' + str(user_id) + ' has been liked.')
+                    print('Post ' + str(p[u'id']) + ' user https://vk.com/' + link + ' ('
+                          + user_info[u'first_name'] + ' ' + user_info[u'last_name'] + ') has been liked.')
                     try:
                         info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                     except VkAPIError as error:
@@ -135,8 +141,11 @@ def work():
             break
         else:
             all_users = members[u'count']
-            for u_id in members[u'items']:
-                like(u_id, info.likes_amount)
+            user_names = info.api.users.get(user_ids=members[u'items'], fields='screen_name')
+            for i in range(len(members[u'items'])):
+                u_id = members[u'items'][i]
+                u_info = user_names[i]
+                like(u_id, u_info, info.likes_amount)
                 info.got += 1
                 info.write_vars()
                 print('User http://vk.com/id' + str(u_id) + ' posts were liked. Totally ' + str(info.got) +
@@ -157,7 +166,7 @@ def update_token():
         WorkInformation('update token')
         print('Re-auth finished successfully')
     except KeyboardInterrupt:
-        print('Auth interrupted by user')
+        print('\nAuth interrupted by user')
 
 
 if __name__ == '__main__':

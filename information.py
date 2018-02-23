@@ -4,12 +4,13 @@ from urllib.parse import urlparse, parse_qsl
 import os.path
 from configparser import ConfigParser, MissingSectionHeaderError
 
+import json
 import vk
 from vk.exceptions import VkAPIError
 
 
 class WorkInformation:
-    FILENAME = 'variables.cfg'
+    CONFIG_FILE = 'variables.cfg'
     TOKEN_FILE = 'token.cfg'
     V = '5.73'
 
@@ -20,6 +21,7 @@ class WorkInformation:
     delay = None
     group = None
     got = None
+    post_offset = None
 
     def __init__(self, process_type):
         if process_type == 'worker':
@@ -31,6 +33,11 @@ class WorkInformation:
                 quit()
             else:
                 self.get_information_from_file()
+                if self.got == 0:
+                    print('Start new job.')
+                else:
+                    print('Continue the previous job. ' + str(self.got) + ' users are already liked')
+
         elif process_type == 'configurator':
             while not self.check_token():
                 self.auth()
@@ -38,7 +45,7 @@ class WorkInformation:
             if not self.check_variables():
                 self.get_information_from_user()
             else:
-                if input('Variables are ok. Do you want to reconfigure them?(y/n): ') == 'y':
+                if input('Variables are ok. Do you want to reconfigure them? (Y/n): ').lower() != 'n':
                     self.clear_vars()
                     self.get_information_from_user()
 
@@ -59,8 +66,8 @@ class WorkInformation:
         try:
             parse_dict = dict(parse_qsl(urlparse(input('Paste link to open page: ')).fragment))
             self.token = parse_dict[u'access_token']
-            live_time = parse_dict[u'expires_in']
-            got_time = str(time.time())
+            live_time = int(parse_dict[u'expires_in'])
+            got_time = time.time()
             self.write_token(live_time, got_time)
         except KeyError:
             print('Valid token not found. Allow access for application and retry')
@@ -71,14 +78,14 @@ class WorkInformation:
     def check_token(self):
         if not os.path.exists(self.TOKEN_FILE):
             return False
-        try:
-            token_config = ConfigParser()
-            token_config.read(self.TOKEN_FILE)
-            self.token = token_config['TOKEN']['token']
-            live_time = int(token_config['TOKEN']['live_time'])
-            got_time = float(token_config['TOKEN']['got_time'])
-        except (KeyError, MissingSectionHeaderError):
-            return False
+        with open(self.TOKEN_FILE, 'r', encoding='utf-8') as token_file:
+            try:
+                  token_data = json.loads(token_file.read())
+                  self.token = token_data['token']
+                  live_time = token_data['live_time']
+                  got_time = token_data['got_time']
+            except ValueError:
+                  return False
         if time.time() - got_time > live_time:
             print('Token expired!')
             return False
@@ -94,11 +101,13 @@ class WorkInformation:
         return True
 
     def check_variables(self):
-        if not os.path.exists(self.FILENAME):
+        if not os.path.exists(self.CONFIG_FILE):
             return False
-        num_lines = sum(1 for line in open(self.FILENAME))
-        if num_lines != 5:
-            return False
+        with open(self.CONFIG_FILE, 'r', encoding='utf-8') as data_file:
+           try:
+               data = json.loads(data_file.read())
+           except ValueError:
+               return False
         return True
 
     'Gathering information'
@@ -108,9 +117,7 @@ class WorkInformation:
             group = urlparse(input('Group link or group id: ')).path
             if group[0] == '/':
                 group = group[1:]
-            print('Group ID ', group, ', is correct ?(y/n)')
-            ok = input().lower()
-            if ok == 'y':
+            if input('Group ID "' + group + '", is correct? (Y/n) ').lower() != 'n':
                 try:
                     self.api.groups.getMembers(group_id=group, count=1, v=self.V)
                     break
@@ -121,41 +128,47 @@ class WorkInformation:
         return group
 
     def get_information_from_user(self):
-        print('Start new job. Configure:')
-        self.likes_amount = input('Max likes on user page("inf" for infinity): ')
-        self.delay = float(input('Delay between requests (seconds, small values lead to a captcha and temporary '
+        print('\nConfigure variables:')
+        self.likes_amount = int(input('Max likes on user page("inf" for infinity): '))
+        self.delay = int(input('Delay between requests (seconds, small values lead to a captcha and temporary '
                                  'blocking), it is recommended not less than 10 seconds: '))
+        self.post_offset = int(input('The offset between the posts: '))
         self.group = self.get_group_name()
         self.got = 0
         self.write_vars()
 
     def get_information_from_file(self):
-        config = ConfigParser()
-        config.read(self.FILENAME)
-        self.likes_amount = config['MAIN']['likes_amount']
-        self.delay = float(config['MAIN']['delay'])
-        self.group = config['MAIN']['group']
-        self.got = int(config['MAIN']['got'])
-        print('Continue the previous job. ' + str(self.got) + ' users are already liked')
+        with open(self.CONFIG_FILE, 'r', encoding='utf-8') as data_file:
+            data = json.loads(data_file.read())
+            self.likes_amount = data['likes_amount']
+            self.delay = data['delay']
+            self.group = data['group']
+            self.got = data['got']
+            self.post_offset = data['post_offset']
 
     'Writers'
 
-    def write_token(self, lt, gt):
-        with open(self.TOKEN_FILE, 'w') as t:
-            t.write('[TOKEN]\n')
-            t.write('token=' + self.token + '\n')
-            t.write('live_time=' + lt + '\n')
-            t.write('got_time=' + gt + '\n')
+    def write_token(self, live_time, got_time):
+        with open(self.TOKEN_FILE, 'w') as token_file:
+            d = {
+               "token": self.token,
+               "live_time": live_time,
+               "got_time": got_time,
+            }
+            token_file.write(json.dumps(d))
 
     def write_vars(self):
-        with open(self.FILENAME, 'w') as var_conf:
-            var_conf.write('[MAIN]\n')
-            var_conf.write('likes_amount=' + self.likes_amount + '\n')
-            var_conf.write('delay=' + str(self.delay) + '\n')
-            var_conf.write('group=' + self.group + '\n')
-            var_conf.write('got=' + str(self.got) + '\n')
+        with open(self.CONFIG_FILE, 'w') as vars_file:
+            d = {
+               "likes_amount": self.likes_amount,
+               "delay": self.delay,
+               "group": self.group,
+               "got": self.got,
+               "post_offset": self.post_offset,
+            }
+            vars_file.write(json.dumps(d))
 
     def clear_vars(self):
-        vars_file = open(self.FILENAME, 'w')
+        vars_file = open(self.CONFIG_FILE, 'w')
         vars_file.write('')
         vars_file.close()

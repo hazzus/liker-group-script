@@ -32,6 +32,11 @@ class WorkInformation:
                 quit()
             else:
                 self.get_information_from_file()
+                if self.got == 0:
+                    print('Start new job.')
+                else:
+                    print('Continue the previous job. ' + str(self.got) + ' users are already liked')
+
         elif process_type == 'configurator':
             while not self.check_token():
                 self.auth()
@@ -120,7 +125,7 @@ class WorkInformation:
         return group
 
     def get_information_from_user(self):
-        print('Start new job. Configure:')
+        print('\nConfigure variables:')
         self.likes_amount = input('Max likes on user page("inf" for infinity): ')
         self.delay = int(input('Delay between requests (seconds, small values lead to a captcha and temporary '
                                  'blocking), it is recommended not less than 10 seconds: '))
@@ -137,7 +142,6 @@ class WorkInformation:
         self.group = config['MAIN']['group']
         self.got = int(config['MAIN']['got'])
         self.post_offset = int(config['MAIN']['post_offset'])
-        print('Continue the previous job. ' + str(self.got) + ' users are already liked')
 
     'Writers'
 

@@ -28,7 +28,6 @@ def captcha_cover(error):
 def like(user_id, user_info, amount):
     off = 0
     liked = 0
-    link = ''
     if 'screen_name' in user_info.keys():
         link = user_info[u'screen_name']
     else:
@@ -61,6 +60,7 @@ def like(user_id, user_info, amount):
             else:
                 print(error)
         time.sleep(info.delay)
+        off += 100
         if (not posts) or (liked == amount):
             break
         else:
@@ -141,7 +141,7 @@ def work():
             break
         else:
             all_users = members[u'count']
-            user_names = info.api.users.get(user_ids=members[u'items'], fields='screen_name')
+            user_names = info.api.users.get(user_ids=members[u'items'], fields='screen_name', v=info.V)
             for i in range(len(members[u'items'])):
                 u_id = members[u'items'][i]
                 u_info = user_names[i]
@@ -169,11 +169,18 @@ def update_token():
         print('\nAuth interrupted by user')
 
 
+def debug_mode(user_links):
+    pass
+    # TODO Implement the debug mode
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] == 'init':
         update_variables()
     elif len(sys.argv) == 2 and sys.argv[1] == 'update_token':
         update_token()
+    elif len(sys.argv) > 2 and sys.argv[1] == 'debug':
+        debug_mode(sys.argv[2:])
     elif len(sys.argv) == 1:
         info = WorkInformation('worker')
         try:

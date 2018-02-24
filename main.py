@@ -155,7 +155,7 @@ def work():
 
 def update_variables():
     try:
-        WorkInformation('update vars')
+        WorkInformation('initial')
         print('Configures currently saved. You can now run without argument')
     except KeyboardInterrupt:
         print('\nProcess of configure interrupted by user')

@@ -25,7 +25,8 @@ class WorkInformation:
     def __init__(self, process_type):
         if process_type == 'worker':
             if not self.check_token():
-                print('Token not configured or broken, auth needed. Try running with \'update_token\' argument')
+                print('Token not configured or broken, auth needed. '
+                      'Try running with \'init\' or \'update_token\' argument')
                 quit()
             if not self.check_variables():
                 print('Variables not configured or broken. Try running with \'init\' argument')
@@ -36,9 +37,9 @@ class WorkInformation:
                     print('Start new job.')
                 else:
                     print('Continue the previous job. ' + str(self.got) + ' users are already liked')
-        elif process_type == 'update vars':
-            if not self.check_token():
-                print('Invalid token. Firstly try running with \'update_token\' parameter')
+        elif process_type == 'initial':
+            while not self.check_token():
+                self.auth()
             if not self.check_variables():
                 self.get_information_from_user()
             else:

@@ -65,6 +65,7 @@ class WorkInformation:
         site = 'https://oauth.vk.com/authorize?client_id=6004708&' \
                'redirect_uri=https://oauth.vk.com/blank.html&scope=wall&response_type=token&v=5.73'
         print('After 6 seconds, the authentication site will open, do not close the tab after allowing access')
+        print('Link if not opened - ' + site)
         time.sleep(6)
         wb.open(site)
         try:

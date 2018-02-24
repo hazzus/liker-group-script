@@ -20,6 +20,7 @@ def open_image(captcha_url):
 def captcha_cover(error):
     # TODO normal single method for captcha cover with constructor from error answer and eval()
     print(error)
+    print('Link on captcha - ' + error.captcha_img)
     open_image(error.captcha_img)
     'webbrowser.open(error.captcha_img)'
     return input('Enter captcha text: '), error.captcha_sid

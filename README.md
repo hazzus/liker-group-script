@@ -15,7 +15,7 @@ Likes people from groups VK
 `python3 main.py`
 
 For changing token there is separate argument:  
-`python3 main.py update_token`
+`python3 main.py update_token`  
 If you need debug-mode, that is liking one person or list of people:  
 `python3 main.py debug <user links list>`
 
@@ -30,7 +30,7 @@ If you need debug-mode, that is liking one person or list of people:
 `python3 main.py`
 
 Для изменения токена есть отдельный аргумент:  
-`python3 main.py update_token`
+`python3 main.py update_token`  
 Если нужен дебаг, лайкающий только одного человека или определенный список страниц:  
 `python3 main.py debug <список ссылкок пользователей>`
 

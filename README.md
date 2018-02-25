@@ -14,8 +14,10 @@ Likes people from groups VK
 3. Now you can run script, enjoy new followers and friends:  
 `python3 main.py`
 
-For changing token ther is separate argument:  
+For changing token there is separate argument:  
 `python3 main.py update_token`
+If you need debug-mode, that is liking one person or list of people:  
+`python3 main.py debug <user links list>`
 
 ## Инструкция:
 1. Установите зависимости:  
@@ -29,6 +31,8 @@ For changing token ther is separate argument:
 
 Для изменения токена есть отдельный аргумент:  
 `python3 main.py update_token`
+Если нужен дебаг, лайкающий только одного человека или определенный список страниц:  
+`python3 main.py debug <список ссылкок пользователей>`
 
 ## Information
 This Python 3 script has separate class `WorkInformation` containing all information about work and allowing to configure your **.cfg** files. `main.py` does all the work - gets all users from group members and put likes every 3 posts on their page. Program prints all middle results, can handle captcha and catches the majority of `Exceptions`. For requests to VkAPI I use this lib - https://github.com/dimka665/vk

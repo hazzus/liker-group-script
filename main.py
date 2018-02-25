@@ -1,5 +1,6 @@
 import time
 from urllib.request import urlopen
+from urllib.parse import urlparse
 from PIL import Image
 from requests.exceptions import ReadTimeout, ConnectionError
 import sys
@@ -171,30 +172,37 @@ def update_token():
 
 
 def debug_mode(user_links):
-    pass
-    # TODO Implement the debug mode
+    global info
+    info = WorkInformation('debug')
+    for i in range(len(user_links)):
+        user_links[i] = urlparse(user_links[i]).path[1:]
+    user_links = str(user_links).replace(' ', '')
+    user_links = user_links[2: len(user_links) - 2]
+    users = info.api.users.get(user_ids=user_links, fields='screen_name', v=info.V)
+    for user in users:
+        like(user[u'id'], user, info.likes_amount)
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2 and sys.argv[1] == 'init':
-        update_variables()
-    elif len(sys.argv) == 2 and sys.argv[1] == 'update_token':
-        update_token()
-    elif len(sys.argv) > 2 and sys.argv[1] == 'debug':
-        debug_mode(sys.argv[2:])
-    elif len(sys.argv) == 1:
-        info = WorkInformation('worker')
-        try:
+    try:
+        if len(sys.argv) == 2 and sys.argv[1] == 'init':
+            update_variables()
+        elif len(sys.argv) == 2 and sys.argv[1] == 'update_token':
+            update_token()
+        elif len(sys.argv) > 2 and sys.argv[1] == 'debug':
+            debug_mode(sys.argv[2:])
+        elif len(sys.argv) == 1:
+            info = WorkInformation('worker')
             work()
-        except ReadTimeout:
-            print('Timeout (connection broken)')
-            if info is not None:
-                info.write_vars()
-        except ConnectionError:
-            print('Connection not established')
-        except (KeyboardInterrupt, SystemExit):
-            if info is not None:
-                info.write_vars()
-            print('\nProcess interrupted, current state saved')
-    else:
-        print('Invalid argument usage')
+        else:
+            print('Invalid argument usage')
+    except ReadTimeout:
+        print('Timeout (connection broken)')
+        if info is not None:
+            info.write_vars()
+    except ConnectionError:
+        print('Connection not established')
+    except KeyboardInterrupt:
+        if info is not None:
+            info.write_vars()
+        print('\nProcess interrupted, current state saved')

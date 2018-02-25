@@ -31,12 +31,11 @@ class WorkInformation:
             if not self.check_variables():
                 print('Variables not configured or broken. Try running with \'init\' argument')
                 quit()
+            self.get_information_from_file()
+            if self.got == 0:
+                print('Start new job.')
             else:
-                self.get_information_from_file()
-                if self.got == 0:
-                    print('Start new job.')
-                else:
-                    print('Continue the previous job. ' + str(self.got) + ' users are already liked')
+                print('Continue the previous job. ' + str(self.got) + ' users are already liked')
         elif process_type == 'initial':
             while not self.check_token():
                 self.auth()
@@ -53,6 +52,14 @@ class WorkInformation:
                     print('Invalid token')
                 else:
                     break
+        elif process_type == 'debug':
+            if not self.check_token():
+                print('Token not configured or broken, auth needed. '
+                      'Try running with \'init\' or \'update_token\' argument')
+                quit()
+            self.delay = float(input('Enter delay: '))
+            self.likes_amount = int(input('Enter likes amount: '))
+            self.post_offset = int(input('Enter post offset: '))
 
     'Authentication'
 

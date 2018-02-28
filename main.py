@@ -18,21 +18,26 @@ def open_image(captcha_url):
     image.show()
 
 
+def request_constructor(parameters):
+    inside = ''
+    for key in parameters:
+        if key != 'oauth' and key != 'method':
+            inside += (key + '=\'' + parameters[key] + '\', ')
+    main = 'info.api.' + parameters[u'method']
+    return [main, inside]
+
+
 def captcha_cover(error):
     while True:
         try:
-            params = error.request_params
-            inside = ''
             print(error)
             print('Link on captcha - ' + error.captcha_img)
             open_image(error.captcha_img)
-            for key in params:
-                if key != 'oauth' and key != 'method':
-                    inside += (key + '=\'' + params[key] + '\', ')
-            inside += 'captcha_sid=\'' + str(error.captcha_sid) + '\', '
-            inside += 'captcha_key=\'' + input('Enter captcha text: ') + '\''
-            constructed_request = 'info.api.' + params[u'method'] + '(' + inside + ')'
-            'print(constructed_request)'
+            request = request_constructor(error.request_params)
+            request[1] += 'captcha_sid=\'' + str(error.captcha_sid) + '\', '
+            request[1] += 'captcha_key=\'' + input('Enter captcha text: ') + '\''
+            constructed_request = request[0] + '(' + request[1] + ')'
+            print(constructed_request)
             eval(constructed_request)
             'webbrowser.open(error.captcha_img)'
             break
@@ -43,6 +48,30 @@ def captcha_cover(error):
                 print(e)
                 print('Unhandled error')
                 quit()
+
+
+def error_handler(error, link=None):
+    if error.is_captcha_needed():
+        captcha_cover(error)
+    elif error.code == 6:
+        print('Too many requests, wait 1 seconds')
+        time.sleep(1)
+        request = request_constructor(error.request_params)
+        constructed = request[0] + '(' + request[1][:len(request[1]) - 2] + ')'
+        eval(constructed)
+    elif error.code == 18:
+        print('User https://vk.com/' + link + ' has been deleted or blocked')
+    elif error.code == 125:
+        print('Non-valid group name: ' + info.group)
+        info.group = info.get_group_name()
+        info.write_vars()
+        members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
+                                             count=COUNT, v=info.V)
+        return members
+    else:
+        print(error)
+        print('Unhandled error')
+        quit()
 
 
 def like(user_id, user_info, amount):
@@ -57,16 +86,7 @@ def like(user_id, user_info, amount):
         try:
             posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
         except VkAPIError as error:
-            if error.is_captcha_needed():
-                captcha_cover(error)
-            elif error.code == 6:
-                print('Too many requests, wait 1 seconds')
-                time.sleep(1)
-                posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
-            elif error.code == 18:
-                print('User https://vk.com/' + link + ' has been deleted or blocked')
-            else:
-                print(error)
+            error_handler(error, link=link)
         time.sleep(info.delay)
         off += 100
         if (not posts) or (liked == amount):
@@ -82,14 +102,7 @@ def like(user_id, user_info, amount):
                     try:
                         info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                     except VkAPIError as error:
-                        if error.is_captcha_needed():
-                            captcha_cover(error)
-                        elif error.code == 6:
-                            print('Too many requests, wait 1 second')
-                            time.sleep(1)
-                            info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
-                        else:
-                            print(error)
+                        error_handler(error)
                     time.sleep(info.delay)
                     liked += 1
                 count += 1
@@ -97,26 +110,11 @@ def like(user_id, user_info, amount):
 
 def work():
     while True:
-        members = None
         try:
             members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
                                                  count=COUNT, v=info.V)
         except VkAPIError as error:
-            if error.is_captcha_needed():
-                captcha_cover(error)
-            elif error.code == 6:
-                print('Too many requests, wait 1 second')
-                time.sleep(1)
-                members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
-                                                     count=COUNT, v=info.V)
-            elif error.code == 125:
-                print('Non-valid group name: ' + info.group)
-                info.group = info.get_group_name()
-                info.write_vars()
-                members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
-                                                     count=COUNT, v=info.V)
-            else:
-                print(error)
+            members = error_handler(error)
         time.sleep(info.delay)
         if not members[u'items']:
             print('All users liked')

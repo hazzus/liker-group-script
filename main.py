@@ -68,6 +68,21 @@ def error_handler(error, link=None):
         members = info.api.groups.getMembers(group_id=info.group, offset=info.got,
                                              count=COUNT, v=info.V)
         return members
+    elif error.code == 9:
+        while True:
+            try:
+                print('Vk detected flood ratio! We\'ll try to redo request every 10 seconds to get correct answer')
+                request = request_constructor(error.request_params)
+                constructed = request[0] + '(' + request[1][:len(request[1]) - 2] + ')'
+                eval(constructed)
+                break
+            except VkAPIError as e:
+                if e.code == 9:
+                    time.sleep(10)
+                else:
+                    print(e)
+                    print('Unhandled error')
+                    break
     else:
         print(error)
         print('Unhandled error')

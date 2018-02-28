@@ -19,12 +19,30 @@ def open_image(captcha_url):
 
 
 def captcha_cover(error):
-    # TODO normal single method for captcha cover with constructor from error answer and eval()
-    print(error)
-    print('Link on captcha - ' + error.captcha_img)
-    open_image(error.captcha_img)
-    'webbrowser.open(error.captcha_img)'
-    return input('Enter captcha text: '), error.captcha_sid
+    while True:
+        try:
+            params = error.request_params
+            inside = ''
+            print(error)
+            print('Link on captcha - ' + error.captcha_img)
+            open_image(error.captcha_img)
+            for key in params:
+                if key != 'oauth' and key != 'method':
+                    inside += (key + '=\'' + params[key] + '\', ')
+            inside += 'captcha_sid=\'' + str(error.captcha_sid) + '\', '
+            inside += 'captcha_key=\'' + input('Enter captcha text: ') + '\''
+            constructed_request = 'info.api.' + params[u'method'] + '(' + inside + ')'
+            'print(constructed_request)'
+            eval(constructed_request)
+            'webbrowser.open(error.captcha_img)'
+            break
+        except VkAPIError as e:
+            if e.is_captcha_needed():
+                time.sleep(2)
+            else:
+                print(e)
+                print('Unhandled error')
+                quit()
 
 
 def like(user_id, user_info, amount):
@@ -40,19 +58,7 @@ def like(user_id, user_info, amount):
             posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V)[u'items']
         except VkAPIError as error:
             if error.is_captcha_needed():
-                while True:
-                    try:
-                        captcha = captcha_cover(error)
-                        posts = info.api.wall.get(owner_id=user_id, offset=off, count=100, filter='owner', v=info.V,
-                                                  captcha_sid=captcha[1], captcha_key=captcha[0])[u'items']
-                        break
-                    except VkAPIError as e:
-                        if e.is_captcha_needed():
-                            time.sleep(info.delay)
-                        else:
-                            print(e)
-                            print('Unhandled error')
-                            quit()
+                captcha_cover(error)
             elif error.code == 6:
                 print('Too many requests, wait 1 seconds')
                 time.sleep(1)
@@ -77,19 +83,7 @@ def like(user_id, user_info, amount):
                         info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V)
                     except VkAPIError as error:
                         if error.is_captcha_needed():
-                            while True:
-                                try:
-                                    captcha = captcha_cover(error)
-                                    info.api.likes.add(type='post', owner_id=user_id, item_id=p[u'id'], v=info.V,
-                                                       captcha_sid=captcha[1], captcha_key=captcha[0])
-                                    break
-                                except VkAPIError as e:
-                                    if e.is_captcha_needed():
-                                        time.sleep(info.delay)
-                                    else:
-                                        print(e)
-                                        print('Unhandled error')
-                                        quit()
+                            captcha_cover(error)
                         elif error.code == 6:
                             print('Too many requests, wait 1 second')
                             time.sleep(1)
@@ -109,21 +103,7 @@ def work():
                                                  count=COUNT, v=info.V)
         except VkAPIError as error:
             if error.is_captcha_needed():
-                while True:
-                    try:
-                        captcha = captcha_cover(error)
-                        members = \
-                            info.api.groups.getMembers(group_id=info.group, offset=info.got, count=COUNT, v=info.V,
-                                                       captcha_sid=captcha[1],
-                                                       captcha_key=captcha[0])
-                        break
-                    except VkAPIError as e:
-                        if e.is_captcha_needed():
-                            time.sleep(info.delay)
-                        else:
-                            print(e)
-                            print('Unhandled error')
-                            quit()
+                captcha_cover(error)
             elif error.code == 6:
                 print('Too many requests, wait 1 second')
                 time.sleep(1)
